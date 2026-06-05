@@ -64,6 +64,14 @@ env-check:
 			exit 1; \
 		fi; \
 	done; \
+	if [ $${#MINIO_ROOT_USER} -lt 3 ]; then \
+		echo "MINIO_ROOT_USER must be at least 3 characters."; \
+		exit 1; \
+	fi; \
+	if [ $${#MINIO_ROOT_PASSWORD} -lt 8 ]; then \
+		echo "MINIO_ROOT_PASSWORD must be at least 8 characters."; \
+		exit 1; \
+	fi; \
 	echo "Environment variables are valid."
 
 up: env-check
