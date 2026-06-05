@@ -3,6 +3,7 @@ package kr.ai.ket.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 
+@Getter
 @Entity
 @Table(
         name = "country",
@@ -11,7 +12,6 @@ import lombok.Getter;
                 @UniqueConstraint(name = "uk_country_code3", columnNames = "code3"),
         }
 )
-@Getter
 public class Country {
 
     @Id

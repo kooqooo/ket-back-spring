@@ -6,8 +6,8 @@ import lombok.Getter;
 @AllArgsConstructor
 @Getter
 public class CountryDto {
-    String name;
-    String code;
-    String code3;
-    String flagEmoji;
+    private final String name;
+    private final String code;
+    private final String code3;
+    private final String flagEmoji;
 }

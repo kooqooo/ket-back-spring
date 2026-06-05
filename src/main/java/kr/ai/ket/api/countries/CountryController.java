@@ -9,7 +9,7 @@ public class CountryController {
 
     @GetMapping("/countries")
     public ResponseEntity<CountryDto> get() {
-        return CountryDto;
+        return ResponseEntity.ok(new CountryDto("South Korea", "KR", "KOR", "🇰🇷"));
     }
 
 }
