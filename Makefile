@@ -3,8 +3,27 @@ SHELL := /bin/bash
 ENV_FILE ?= .env
 COMPOSE_FILE ?= docker-compose.yaml
 COMPOSE = docker compose --env-file $(ENV_FILE) -f $(COMPOSE_FILE)
+DDL_DIR ?= db/ddl
+SEED_DIR ?= db/seed
+LOCAL_SEED_DIR ?= $(SEED_DIR)/local
 
-.PHONY: help env-check up down clean restart reset ps logs postgres redis minio run dev test check build secret
+.PHONY: help env-check up down clean restart reset ps logs postgres redis minio ddl seed seed-local db-init db-init-local run local test check build secret
+
+define run-sql-files
+	@set -e; set -a; source $(ENV_FILE); set +a; \
+	shopt -s nullglob; \
+	files=("$(1)"/*.sql); \
+	if [ $${#files[@]} -eq 0 ]; then \
+		echo "No SQL files found in $(1)."; \
+		exit 0; \
+	fi; \
+	for file in "$${files[@]}"; do \
+		echo "Applying $$file..."; \
+		$(COMPOSE) exec -T postgres \
+			psql --single-transaction -v ON_ERROR_STOP=1 \
+				-U "$$POSTGRES_USER" -d "$$POSTGRES_DB" < "$$file"; \
+	done
+endef
 
 help:
 	@echo "사용 가능한 명령어:"
@@ -19,6 +38,11 @@ help:
 	@echo "  make postgres    PostgreSQL 셸 접속"
 	@echo "  make redis       Redis CLI 접속"
 	@echo "  make minio       MinIO 접속 URL 출력"
+	@echo "  make ddl         db/ddl의 DDL SQL 실행"
+	@echo "  make seed        db/seed의 공통 seed SQL 실행"
+	@echo "  make seed-local  공통 seed와 db/seed/local의 로컬 seed SQL 실행"
+	@echo "  make db-init     DDL 실행 후 공통 seed 적용"
+	@echo "  make db-init-local  DDL 실행 후 공통 및 로컬 seed 적용"
 	@echo "  make run         Spring Boot 애플리케이션 실행"
 	@echo "  make dev         local 프로필로 Spring Boot 애플리케이션 실행"
 	@echo "  make test        테스트 실행"
@@ -90,10 +114,27 @@ minio:
 	echo "MinIO API:     http://localhost:$$MINIO_API_PORT"; \
 	echo "MinIO Console: http://localhost:$$MINIO_CONSOLE_PORT"
 
+ddl: env-check
+	$(call run-sql-files,$(DDL_DIR))
+
+seed: env-check
+	$(call run-sql-files,$(SEED_DIR))
+
+seed-local: seed
+	$(call run-sql-files,$(LOCAL_SEED_DIR))
+
+db-init:
+	$(MAKE) ddl
+	$(MAKE) seed
+
+db-init-local:
+	$(MAKE) ddl
+	$(MAKE) seed-local
+
 run:
 	set -a; source $(ENV_FILE); set +a; ./gradlew bootRun
 
-dev:
+local:
 	set -a; source $(ENV_FILE); set +a; ./gradlew bootRun --args='--spring.profiles.active=local'
 
 test:

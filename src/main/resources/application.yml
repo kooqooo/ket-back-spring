@@ -1,4 +1,3 @@
-#file: noinspection YAMLSchemaValidation
 spring:
   application:
     name: ket-back-spring
@@ -17,20 +16,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    properties:
-      jakarta:
-        persistence:
-          schema-generation:
-            scripts:
-              action: create
-              create-target: build/generated-schema.sql
-            database:
-              action: none
-    show-sql: true
-
-  liquibase:
-    enabled: true
-    change-log: classpath:db/changelog/db.changelog-master.yaml
+    show-sql: false
 
 minio:
   endpoint: ${MINIO_ENDPOINT_URL}
