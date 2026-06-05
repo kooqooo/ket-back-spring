@@ -1,10 +1,10 @@
-package com.kooqooo.springpractice;
+package kr.ai.ket;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class SpringPracticeApplicationTests {
+class ApplicationTests {
 
     @Test
     void contextLoads() {

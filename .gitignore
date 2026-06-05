@@ -1,10 +1,19 @@
-.DS_Store
+# Environment
+.env
+.env.*
+!.env.example
+
 HELP.md
-.gradle
+.gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+
+### Logs and JVM crash reports ###
+*.log
+hs_err_pid*
+replay_pid*
 
 ### STS ###
 .apt_generated
@@ -19,7 +28,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-.idea
+.idea/
 *.iws
 *.iml
 *.ipr
@@ -36,3 +45,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### OS ###
+.DS_Store
+Thumbs.db
