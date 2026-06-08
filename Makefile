@@ -111,11 +111,11 @@ logs:
 
 postgres:
 	@set -a; source $(ENV_FILE); set +a; \
-	docker exec -it pg psql -U $$POSTGRES_USER -d $$POSTGRES_DB
+	docker exec -it ket-back-spring-postgres-1 psql -U $$POSTGRES_USER -d $$POSTGRES_DB
 
 redis:
 	@set -a; source $(ENV_FILE); set +a; \
-	docker exec -it redis redis-cli -a $$REDIS_PASSWORD
+	docker exec -it ket-back-spring-redis-1 redis-cli -a $$REDIS_PASSWORD
 
 minio:
 	@set -a; source $(ENV_FILE); set +a; \
