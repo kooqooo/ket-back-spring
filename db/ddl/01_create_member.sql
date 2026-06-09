@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS member
     birth_date        date,
     phone_number      VARCHAR(255),
     is_email_verified BOOLEAN                                 NOT NULL,
+    country_id        BIGINT                                  NOT NULL,
     CONSTRAINT pk_member PRIMARY KEY (id)
 );
 
@@ -36,6 +37,18 @@ $$
                        WHERE conname = 'uk_username') THEN
             ALTER TABLE member
                 ADD CONSTRAINT uk_username UNIQUE (username);
+        END IF;
+    END
+$$;
+
+DO
+$$
+    BEGIN
+        IF NOT EXISTS (SELECT 1
+                       FROM pg_constraint
+                       WHERE conname = 'fk_member_country') THEN
+            ALTER TABLE member
+                ADD CONSTRAINT fk_member_on_country FOREIGN KEY (country_id) REFERENCES country (id);
         END IF;
     END
 $$;

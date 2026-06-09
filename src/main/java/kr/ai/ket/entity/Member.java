@@ -1,9 +1,6 @@
 package kr.ai.ket.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -50,4 +47,13 @@ public class Member extends BaseEntity {
 
     @Column(name = "is_email_verified", nullable = false)
     private boolean emailVerified = false;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "country_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_member_country")
+    )
+    private Country country;
+
 }
