@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS member
     updated_at        TIMESTAMP WITHOUT TIME ZONE,
     username          VARCHAR(50)                             NOT NULL,
     password          VARCHAR(255)                            NOT NULL,
-    is_admin          BOOLEAN                                 NOT NULL,
+    role              VARCHAR(30)                             NOT NULL,
     full_name         VARCHAR(255)                            NOT NULL,
     first_name        VARCHAR(255),
     last_name         VARCHAR(255),

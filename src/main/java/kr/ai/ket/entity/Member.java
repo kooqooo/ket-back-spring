@@ -1,6 +1,7 @@
 package kr.ai.ket.entity;
 
 import jakarta.persistence.*;
+import kr.ai.ket.entity.type.Role;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -24,8 +25,9 @@ public class Member extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "is_admin", nullable = false)
-    private boolean admin = false;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     private String fullName;
