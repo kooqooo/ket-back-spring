@@ -48,7 +48,7 @@ $$
                        FROM pg_constraint
                        WHERE conname = 'fk_member_country') THEN
             ALTER TABLE member
-                ADD CONSTRAINT fk_member_on_country FOREIGN KEY (country_id) REFERENCES country (id);
+                ADD CONSTRAINT fk_member_country FOREIGN KEY (country_id) REFERENCES country (id);
         END IF;
     END
 $$;
