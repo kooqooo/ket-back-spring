@@ -5,7 +5,7 @@ config:
   background: dark
 ---
 erDiagram
-    direction LR
+    %% direction LR
 
     country {
         long id PK
@@ -17,12 +17,22 @@ erDiagram
         bool is_active "선택 가능한 국가여부"
     }
 
+    institution {
+        long id PK "기관 PK"
+
+        string name "기관명"
+        string code "기관 코드"
+        string alias "기관 별칭"
+    }
+
     member {
         long id PK "회원 PK"
+        long country_id FK "국적 FK"
+        long institution_id FK "기관 FK, nullalble"
 
         string username "로그인 아이디"
         string password "비밀번호 해시"
-        string is_admin "어드민 여부"
+        string role "역할(하이퍼러닝, 기관 관리자, 학생)"
 
         string full_name "이름"
         string first_name "이름(명)"
@@ -32,8 +42,8 @@ erDiagram
         string phone_number "전화번호"
         bool is_email_verified "이메일 인증 여부"
 
-        datetime created_at "생성 시각"
-        datetime updated_at "수정 시각"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     refresh_token {
@@ -44,57 +54,50 @@ erDiagram
         string jti "JWT JTI"
         string token_hash
 
-        datetime issued_at "발급 타임스탬프"
-        datetime expires_at "만료 타임스탬프"
-        datetime revoked_at "폐기 타임스탬프"
+        timestamptz issued_at "발급 타임스탬프"
+        timestamptz expires_at "만료 타임스탬프"
+        timestamptz revoked_at "폐기 타임스탬프"
         enum revoked_reason "폐기 유형(로그아웃, 회전)"
     }
 
     exam_level {
         long id PK "시험 레벨 PK"
         string level "KET 레벨 코드"
-        long price "응시료"
-    }
-
-    candidate_number_counter {
-        long exam_level_id PK,FK "시험 레벨 FK"
-        long year PK "연도"
-        long iteration_number PK "차수"
-        long last_value "마지막 수험번호"
+        int price "응시료"
     }
 
     rating_tier {
         long id PK "등급 기준 PK"
         long exam_level_id FK "시험 레벨 FK"
-        long ket_tier "KET 세부 레벨"
-        string cefr_level "CEFR 레벨"
-        long min_score "최소 점수"
-    }
 
+        int ket_tier "KET 세부 레벨"
+        string cefr_level "CEFR 레벨"
+        int min_score "최소 점수"
+    }
 
     exam {
         long id PK "시험 PK"
         long level_id FK "시험 레벨 FK"
-        long iteration_number "회차"
-        string code "시험 코드"
-        string title "시험명"
 
-        datetime registration_start_at "접수 시작"
-        datetime registration_end_at "접수 종료"
-        datetime start_at "응시 시작"
-        datetime end_at "응시 종료"
-        datetime graded_at "채점 완료"
-        datetime results_release_at "결과 공개"
+        int iteration_number "회차"
+        string code "시험 코드"
+        string name "시험명"
+
+        timestamptz registration_start_at "접수 시작"
+        timestamptz registration_end_at "접수 종료"
+        timestamptz start_at "응시 시작"
+        timestamptz end_at "응시 종료"
+        timestamptz graded_at "채점 완료"
+        timestamptz results_release_at "결과 공개"
 
         bool is_published "공개 여부"
-        datetime created_at "생성 시각"
-        datetime updated_at "수정 시각"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     payment {
         long id PK "결제 PK"
         long exam_session_id FK "응시 세션 FK"
-        long member_id FK "결제 회원 FK"
 
         string portone_payment_id "포트원 결제 ID"
         long amount "결제 금액"
@@ -102,54 +105,45 @@ erDiagram
         string method "결제 수단"
         string status "결제 상태"
 
-        datetime paid_at "결제 완료 시각"
-        datetime cancelled_at "결제 취소 시각"
-        datetime created_at "생성 시각"
-        datetime updated_at "수정 시각"
+        timestamptz paid_at "결제 완료 시각"
+        timestamptz cancelled_at "결제 취소 시각"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     exam_session {
         long id PK "응시 세션 PK"
         uuid public_id "세션 공개 UUID"
-
         long exam_id FK "시험 FK"
         long member_id FK "접수 회원 FK"
-        long exam_level_id FK "수험번호용 레벨 FK"
 
-        long candidate_year "수험 연도"
-        long candidate_iteration_number "수험 차수"
-        long candidate_seq_no "수험 순번"
-
-        string candidate_full_name "응시자 이름"
-        string candidate_first_name "응시자 이름(명)"
-        string candidate_last_name "응시자 성"
-        date candidate_birthdate "응시자 생년월일"
-        string candidate_email "응시자 이메일"
-        string candidate_phone_number "응시자 연락처"
-        string candidate_gender "응시자 성별"
-        bool candidate_is_foreigner "응시자 외국인 여부"
+        string examinee_full_name "응시자 이름"
+        string examinee_first_name "응시자 first name(영문)"
+        string examinee_last_name "응시자 last name(영문)"
+        date examinee_birthdate "응시자 생년월일"
+        string examinee_email "응시자 이메일"
+        bool examinee_is_foreigner "응시자 외국인 여부"
 
         string status "세션 상태"
-        datetime registered_at "접수 시각"
-        datetime started_at "응시 시작"
-        datetime submitted_at "제출 시각"
-        datetime graded_at "채점 완료 시각"
+        timestamptz registered_at "접수 시각"
+        timestamptz started_at "응시 시작"
+        timestamptz submitted_at "제출 시각"
+        timestamptz graded_at "채점 완료 시각"
 
-        long total_score "총점"
-        long ket_tier "산출 KET 등급"
+        int total_score "총점"
+        int ket_tier "산출 KET 등급"
         string cefr_level "산출 CEFR 레벨"
         bool passed "합격 여부"
 
-        datetime created_at "생성 시각"
-        datetime updated_at "수정 시각"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     question_info {
         long id PK "문항 정보 PK"
-
         long exam_level_id FK "시험 레벨 FK"
-        long number "문항 번호"
 
+        int number "문항 번호"
         string assessment_goal "평가 목표"
         string curriculum_code "교육과정 코드"
         string question_type "문항 유형"
@@ -158,24 +152,22 @@ erDiagram
         string difficulty "난이도"
         string writing_style "문체"
 
-        long assessment_time "평가 시간(분)"
-        long character_count "글자 수"
-        long default_score "기본 배점"
+        int assessment_time "평가 시간(분)"
+        int character_count "글자 수"
+        int default_score "기본 배점"
     }
 
     question {
         long id PK "문항 PK"
-
         long exam_id FK "시험 FK"
         long question_info_id FK "문항 정보 FK"
 
-        long number "시험 내 문항 번호"
-        long order_index "정렬 순서"
-        long score "문항 배점"
+        int number "시험 내 문항 번호"
+        int order_index "정렬 순서"
 
         string instruction "지시문"
-        string content_text "본문"
-        string prompt "발문"
+        string content_text "제시자료(제시문, 지문, 상황, 조건, 주장, 보기, 쟁점, 자료 등)"
+        string prompt "발문(직접적인 요구사항)"
         string model_answer "모범 답안"
     }
 
@@ -185,21 +177,12 @@ erDiagram
 
         string object_key "스토리지 키"
         string mime_type "MIME 타입"
-        long size_bytes "파일 크기"
+        int size_bytes "파일 크기"
         string sha256 "파일 해시"
-        long width "가로 픽셀"
-        long height "세로 픽셀"
+        int width "가로 픽셀"
+        int height "세로 픽셀"
         string storage_bucket "버킷"
         string storage_region "리전"
-        string provider "스토리지 제공자"
-    }
-
-    rubric {
-        long id PK "루브릭 PK"
-        string code "루브릭 코드"
-        string title "루브릭명"
-        string description "설명"
-        long order_index "정렬 순서"
     }
 
     criterion {
@@ -208,9 +191,19 @@ erDiagram
         long question_info_id FK "문항 정보 FK"
         long rubric_id FK "루브릭 FK"
 
-        long score_value "점수 값"
+        int score_value "점수 값"
         string descriptor "채점 기준 설명"
-        long order_index "정렬 순서"
+        int order_index "정렬 순서"
+    }
+
+    aes_task {
+        long id PK "AES 작업 ID"
+        uuid task_id "비동기 작업 식별자"
+        long exam_session_id FK "응시 세션 FK"
+
+        string status "작업 상태"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     submitted_answer {
@@ -221,7 +214,7 @@ erDiagram
 
         string answer_text "답안 텍스트"
         json answer_payload "답안 원본 Payload"
-        datetime submitted_at "제출 시각"
+        timestamptz submitted_at "제출 시각"
     }
 
     score {
@@ -230,53 +223,47 @@ erDiagram
         long submitted_answer_id FK "제출 답안 FK"
         long rubric_id FK "루브릭 FK"
 
-        long awarded_score "부여 점수"
+        int awarded_score "부여 점수"
         string feedback "피드백"
-
-        string grader_type "채점자 유형"
-        long grader_member_id FK "채점자 회원 FK nullable"
-        datetime graded_at "채점 시각"
+        timestamptz graded_at "채점 시각"
     }
 
-    aes_task {
-        long id PK "AES 작업 ID"
-        uuid task_id "비동기 작업 식별자"
-        long exam_session_id FK "응시 세션 FK"
-        string status "작업 상태"
-        datetime created_at "생성 시각"
-        datetime updated_at "수정 시각"
+    rubric {
+        long id PK "루브릭 PK"
+        string code "루브릭 코드"
+        string name "루브릭명"
+        string description "설명"
+        long order_index "정렬 순서"
     }
 
     country ||--o{ member : "국적"
 
+    institution |o--o{ member : "소속 기관"
+
     member ||--o{ refresh_token : "리프레시 토큰"
     member ||--o{ exam_session : "접수/응시"
-    member ||--o{ payment : "결제"
-    member ||--o{ score : "채점자"
 
     exam_level ||--o{ exam : "레벨별 시험"
     exam_level ||--o{ question_info : "레벨별 문항 정보"
     exam_level ||--o{ rating_tier : "등급 기준"
-    exam_level ||--o{ candidate_number_counter : "수험번호 시퀀스"
-    exam_level ||--o{ exam_session : "수험번호 레벨"
 
-    exam ||--o{ question : "시험 문항"
     exam ||--o{ exam_session : "응시 세션"
+    exam ||--o{ question : "시험 문항"
 
+    exam_session ||--o| aes_task : "채점 작업"
     exam_session ||--o| payment : "결제"
     exam_session ||--o{ submitted_answer : "제출 답안"
-    exam_session ||--o| aes_task : "채점 작업"
 
     question_info ||--o{ question : "문항 생성 정보"
     question_info ||--o{ criterion : "문항별 세부 기준"
 
-    question ||--o| question_image : "문항 이미지"
     question ||--o{ submitted_answer : "제출 답안"
-
-    rubric ||--o{ criterion : "공통 루브릭 기준"
-    rubric ||--o{ score : "루브릭별 점수"
+    question ||--o| question_image : "문항 이미지"
 
     submitted_answer ||--o{ score : "채점 결과"
+
+    rubric ||--o{ score : "루브릭별 점수"
+    rubric ||--o{ criterion : "공통 루브릭 기준"
 
 %% -- 회원 로그인 ID 중복 방지
 %% UNIQUE (username);
@@ -305,11 +292,14 @@ erDiagram
 %% -- 한 답안에서 같은 루브릭 점수 중복 방지
 %% UNIQUE (submitted_answer_id, rubric_id);
 
-%% -- 수험번호 중복 방지
-%% UNIQUE (exam_level_id, candidate_year, candidate_iteration_number, candidate_seq_no);
+%% -- 중복 접수 방지
+%% UNIQUE (exam_id, member_id);
 
 %% -- 세션 공개 UUID 중복 방지
 %% UNIQUE (public_id);
 
 %% -- 결제와 응시 세션 1:1 보장
 %% UNIQUE (exam_session_id);
+
+%% -- 이미지 중복 방지
+%% UNIQUE (question_id);    -- question_image
