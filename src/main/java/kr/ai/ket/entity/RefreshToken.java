@@ -57,6 +57,12 @@ public class RefreshToken {
     @Column
     private RefreshTokenRevokedReason revokedReason;
 
+    @Column(columnDefinition = "TEXT")
+    private String userAgent;
+
+    @Column(length = 45)
+    private String ipAddress;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "replaced_by_token_id",
