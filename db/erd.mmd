@@ -23,12 +23,15 @@ erDiagram
         string name "기관명"
         string code "기관 코드"
         string alias "기관 별칭"
+
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     member {
         long id PK "회원 PK"
         long country_id FK "국적 FK"
-        long institution_id FK "기관 FK, nullalble"
+        long institution_id FK "기관 FK, nullable"
 
         string username "로그인 아이디"
         string password "비밀번호 해시"
