@@ -7,6 +7,6 @@ CREATE TABLE IF NOT EXISTS country
     flag_emoji VARCHAR(8)                              NOT NULL,
     is_active  BOOLEAN                                 NOT NULL,
     CONSTRAINT pk_country PRIMARY KEY (id),
-    CONSTRAINT uk_contry_code UNIQUE (code),
-    CONSTRAINT uk_country_code3 UNIQUE (code3),
+    CONSTRAINT uk_country_code UNIQUE (code),
+    CONSTRAINT uk_country_code3 UNIQUE (code3)
 );
