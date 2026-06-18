@@ -1,6 +1,7 @@
 services:
   postgres:
-    image: postgres:18-alpine
+    image: postgres:18.4-alpine
+    container_name: ket-back-spring-pg
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -8,48 +9,47 @@ services:
     ports:
       - 127.0.0.1:${POSTGRES_PORT}:5432
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-      interval: 10s
-      timeout: 5s
+      interval: 60s
       retries: 5
     restart: unless-stopped
-
   redis:
-    image: redis:8-alpine
+    image: redis:8.6.4-alpine
+    container_name: ket-back-spring-redis
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes" ]
     ports:
       - 127.0.0.1:${REDIS_PORT}:6379
     volumes:
       - redis_data:/data
     healthcheck:
-      test: [ "CMD-SHELL", "redis-cli -a \"$REDIS_PASSWORD\" ping | grep PONG" ]
-      interval: 10s
-      timeout: 5s
+      test: [ "CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG" ]
+      interval: 60s
       retries: 5
     restart: unless-stopped
 
   minio:
-    image: minio/minio:latest
+    image: minio/minio
+    container_name: ket-back-spring-minio
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_BROWSER_REDIRECT_URL: ${MINIO_BROWSER_REDIRECT_URL}
     command: server --console-address ":9001" /data
     ports:
-      - 127.0.0.1:${MINIO_API_PORT}:9000
-      - 127.0.0.1:${MINIO_CONSOLE_PORT}:9001
+      - 127.0.0.1:${MINIO_API_PORT}:9000 # S3 API
+      - 127.0.0.1:${MINIO_CONSOLE_PORT}:9001 # Web Console UI
     volumes:
-      - minio_data:/data
+      - ./data/minio_data:/data
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://127.0.0.1:9000/minio/health/live" ]
-      interval: 10s
+      interval: 60s
       timeout: 5s
       retries: 5
     restart: unless-stopped
 
 volumes:
-  pg_data:
   redis_data:
-  minio_data:
