@@ -6,29 +6,7 @@ CREATE TABLE IF NOT EXISTS country
     code3      VARCHAR(3)                              NOT NULL,
     flag_emoji VARCHAR(8)                              NOT NULL,
     is_active  BOOLEAN                                 NOT NULL,
-    CONSTRAINT pk_country PRIMARY KEY (id)
+    CONSTRAINT pk_country PRIMARY KEY (id),
+    CONSTRAINT uk_contry_code UNIQUE (code),
+    CONSTRAINT uk_country_code3 UNIQUE (code3),
 );
-
-DO
-$$
-    BEGIN
-        IF NOT EXISTS (SELECT 1
-                       FROM pg_constraint
-                       WHERE conname = 'uk_country_code') THEN
-            ALTER TABLE country
-                ADD CONSTRAINT uk_country_code UNIQUE (code);
-        END IF;
-    END
-$$;
-
-DO
-$$
-    BEGIN
-        IF NOT EXISTS (SELECT 1
-                       FROM pg_constraint
-                       WHERE conname = 'uk_country_code3') THEN
-            ALTER TABLE country
-                ADD CONSTRAINT uk_country_code3 UNIQUE (code3);
-        END IF;
-    END
-$$;
