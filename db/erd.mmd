@@ -65,8 +65,7 @@ erDiagram
 
     exam_level {
         long id PK "시험 레벨 PK"
-        string level "KET 레벨 코드"
-        int price "응시료"
+        int level "KET 레벨 코드"
     }
 
     rating_tier {
@@ -81,6 +80,7 @@ erDiagram
     exam {
         long id PK "시험 PK"
         long level_id FK "시험 레벨 FK"
+        long institution_id FK "소속 기관 FK, nullable"
 
         int iteration_number "회차"
         string code "시험 코드"
