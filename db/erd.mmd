@@ -37,7 +37,7 @@ erDiagram
         string password "비밀번호 해시"
         string role "역할(하이퍼러닝, 기관 관리자, 학생)"
 
-        string full_name "이름"
+        string name "이름"
         string first_name "이름(명)"
         string last_name "성"
         date birthdate "생년월일"
@@ -86,14 +86,12 @@ erDiagram
         string code "시험 코드"
         string name "시험명"
 
-        timestamptz registration_start_at "접수 시작"
-        timestamptz registration_end_at "접수 종료"
-        timestamptz start_at "응시 시작"
-        timestamptz end_at "응시 종료"
-        timestamptz graded_at "채점 완료"
-        timestamptz results_release_at "결과 공개"
+        timestamptz registration_starts_at "접수 시작"
+        timestamptz registration_ends_at "접수 종료"
+        timestamptz starts_at "응시 시작"
+        timestamptz ends_at "응시 종료"
+        timestamptz results_available_at "결과 공개"
 
-        bool is_published "공개 여부"
         timestamptz created_at "생성 시각"
         timestamptz updated_at "수정 시각"
     }
@@ -138,6 +136,7 @@ erDiagram
         string cefr_level "산출 CEFR 레벨"
         bool passed "합격 여부"
 
+        timestamptz cancelled_at "접수 취소 시각"
         timestamptz created_at "생성 시각"
         timestamptz updated_at "수정 시각"
     }
@@ -201,7 +200,7 @@ erDiagram
 
     aes_task {
         long id PK "AES 작업 ID"
-        uuid task_id "비동기 작업 식별자"
+        uuid public_id "비동기 작업 식별자"
         long exam_session_id FK "응시 세션 FK"
 
         string status "작업 상태"
@@ -242,6 +241,7 @@ erDiagram
     country ||--o{ member : "국적"
 
     institution |o--o{ member : "소속 기관"
+    institution ||--o{ exam : "소속 기관"
 
     member ||--o{ refresh_token : "리프레시 토큰"
     member ||--o{ exam_session : "접수/응시"
@@ -258,7 +258,7 @@ erDiagram
     exam_session ||--o{ submitted_answer : "제출 답안"
 
     question_info ||--o{ question : "문항 생성 정보"
-    question_info ||--o{ criterion : "문항별 세부 기준"
+    question_info ||--o{ rubric : "문항별 세부 기준"
 
     question ||--o{ submitted_answer : "제출 답안"
     question ||--o| question_image : "문항 이미지"
