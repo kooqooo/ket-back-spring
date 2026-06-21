@@ -19,6 +19,17 @@ import java.time.LocalDate;
 )
 public class Member extends BaseEntity {
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", foreignKey = @ForeignKey(name = "fk_member_institution"))
+    private Institution institution;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "country_id",
+            foreignKey = @ForeignKey(name = "fk_member_country")
+    )
+    private Country country;
+
     @Column(nullable = false, length = 50)
     private String username;
 
@@ -30,7 +41,7 @@ public class Member extends BaseEntity {
     private Role role;
 
     @Column(nullable = false)
-    private String fullName;
+    private String name;
 
     @Column
     private String firstName;
@@ -49,17 +60,5 @@ public class Member extends BaseEntity {
 
     @Column(name = "is_email_verified", nullable = false)
     private boolean emailVerified = false;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id", foreignKey = @ForeignKey(name = "fk_member_institution"))
-    private Institution institution;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "country_id",
-            nullable = false,
-            foreignKey = @ForeignKey(name = "fk_member_country")
-    )
-    private Country country;
 
 }
