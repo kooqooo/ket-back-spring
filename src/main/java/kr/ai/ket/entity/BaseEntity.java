@@ -12,10 +12,10 @@ public abstract class BaseEntity {
     @Column(name = "id")
     private Long id;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant createdAt;
 
-    @Column
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant updatedAt;
 
     @PrePersist
