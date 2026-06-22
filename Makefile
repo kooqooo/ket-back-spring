@@ -82,6 +82,7 @@ down:
 
 clean:
 	$(COMPOSE) down --volumes
+	@rm -rf data/
 
 restart: down up
 
