@@ -5,7 +5,7 @@ config:
   background: dark
 ---
 erDiagram
-    %% direction LR
+    direction LR
 
     country {
         long id PK
@@ -30,7 +30,7 @@ erDiagram
 
     member {
         long id PK "회원 PK"
-        long country_id FK "국적 FK"
+        long country_id FK "국적 FK, nullable"
         long institution_id FK "기관 FK, nullable"
 
         string username "로그인 아이디"
@@ -52,38 +52,37 @@ erDiagram
     refresh_token {
         long id PK "리프레시 토큰 PK"
         long member_id FK "회원 FK"
-        long replaced_by_token_id FK "회전 이전의 토큰의 PK"
+        long replaced_by_token_id FK "이 토큰을 대체한 새 토큰의 PK"
 
-        string jti "JWT JTI"
-        string token_hash
+        uuid jti "JWT JTI"
 
         timestamptz issued_at "발급 타임스탬프"
         timestamptz expires_at "만료 타임스탬프"
         timestamptz revoked_at "폐기 타임스탬프"
-        enum revoked_reason "폐기 유형(로그아웃, 회전)"
+        enum revocation_reason "폐기 유형(로그아웃, 회전)"
     }
 
     exam_level {
         long id PK "시험 레벨 PK"
-        int level "KET 레벨 코드"
+        int level "KET 레벨 (1, 2, 3)"
+        int price "응시료"
     }
 
     rating_tier {
         long id PK "등급 기준 PK"
         long exam_level_id FK "시험 레벨 FK"
 
-        int ket_tier "KET 세부 레벨"
-        string cefr_level "CEFR 레벨"
+        int tier "KET 등급(1-10)"
+        string level "KET 레벨(A1, A2, B1, ...)"
         int min_score "최소 점수"
     }
 
     exam {
         long id PK "시험 PK"
-        long level_id FK "시험 레벨 FK"
+        uuid public_id "시험 공개 UUID"
         long institution_id FK "소속 기관 FK, nullable"
+        long question_set_id FK "출제 문항 세트 FK"
 
-        int iteration_number "회차"
-        string code "시험 코드"
         string name "시험명"
 
         timestamptz registration_starts_at "접수 시작"
@@ -107,7 +106,7 @@ erDiagram
         string status "결제 상태"
 
         timestamptz paid_at "결제 완료 시각"
-        timestamptz cancelled_at "결제 취소 시각"
+        timestamptz canceled_at "결제 취소 시각"
         timestamptz created_at "생성 시각"
         timestamptz updated_at "수정 시각"
     }
@@ -115,28 +114,28 @@ erDiagram
     exam_session {
         long id PK "응시 세션 PK"
         uuid public_id "세션 공개 UUID"
-        long exam_id FK "시험 FK"
-        long member_id FK "접수 회원 FK"
+        long member_id FK "응시 회원 FK"
+        long exam_id FK "정식 시험 FK, nullable"
+        long question_set_id FK "직접 응시 모의고사 세트 FK, nullable"
+        long examinee_country_id FK "응시자 국적 FK"
+        long rating_tier_id FK "산출 등급 기준 FK"
 
-        string examinee_full_name "응시자 이름"
+        bool applicant_is_examinee "신청자와 응시자가 동일한지 여부"
+        string examinee_name "응시자 이름"
         string examinee_first_name "응시자 first name(영문)"
         string examinee_last_name "응시자 last name(영문)"
         date examinee_birthdate "응시자 생년월일"
-        string examinee_email "응시자 이메일"
-        bool examinee_is_foreigner "응시자 외국인 여부"
 
         string status "세션 상태"
         timestamptz registered_at "접수 시각"
+        timestamptz canceled_at "접수 취소 시각"
         timestamptz started_at "응시 시작"
         timestamptz submitted_at "제출 시각"
         timestamptz graded_at "채점 완료 시각"
 
         int total_score "총점"
-        int ket_tier "산출 KET 등급"
-        string cefr_level "산출 CEFR 레벨"
         bool passed "합격 여부"
 
-        timestamptz cancelled_at "접수 취소 시각"
         timestamptz created_at "생성 시각"
         timestamptz updated_at "수정 시각"
     }
@@ -161,16 +160,29 @@ erDiagram
 
     question {
         long id PK "문항 PK"
-        long exam_id FK "시험 FK"
+        long question_set_id FK "소속 문항 세트 FK"
         long question_info_id FK "문항 정보 FK"
 
-        int number "시험 내 문항 번호"
-        int order_index "정렬 순서"
-
         string instruction "지시문"
-        string content_text "제시자료(제시문, 지문, 상황, 조건, 주장, 보기, 쟁점, 자료 등)"
+        string content_text "제시자료(제시문, 지문, 상황, 조건, 보기, 쟁점, 자료 등)"
         string prompt "발문(직접적인 요구사항)"
-        string model_answer "모범 답안"
+        string model_answer "모범 답안, nullable"
+
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
+    }
+
+    question_set {
+        long id PK "문항 세트 PK"
+        long exam_level_id FK "시험 레벨 FK"
+
+        string name "세트명"
+        string description "설명"
+        string difficulty "세트 난이도"
+        string set_type "용도(PUBLIC_EXAM, INSTITUTION_EXAM, MOCK_EXAM)"
+
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     question_image {
@@ -185,17 +197,18 @@ erDiagram
         int height "세로 픽셀"
         string storage_bucket "버킷"
         string storage_region "리전"
+
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     criterion {
         long id PK "세부 기준 PK"
-
         long question_info_id FK "문항 정보 FK"
         long rubric_id FK "루브릭 FK"
 
         int score_value "점수 값"
         string descriptor "채점 기준 설명"
-        int order_index "정렬 순서"
     }
 
     aes_task {
@@ -212,11 +225,12 @@ erDiagram
         long id PK "제출 답안 PK"
 
         long exam_session_id FK "응시 세션 FK"
-        long question_id FK "문항 FK"
+        long question_id FK "출제 문항 FK"
 
         string answer_text "답안 텍스트"
-        json answer_payload "답안 원본 Payload"
         timestamptz submitted_at "제출 시각"
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
     }
 
     score {
@@ -233,40 +247,42 @@ erDiagram
     rubric {
         long id PK "루브릭 PK"
         string code "루브릭 코드"
-        string name "루브릭명"
         string description "설명"
-        long order_index "정렬 순서"
+        int sort_order "정렬 순서"
     }
 
     country ||--o{ member : "국적"
 
     institution |o--o{ member : "소속 기관"
-    institution ||--o{ exam : "소속 기관"
+    institution |o--o{ exam : "소속 기관"
 
     member ||--o{ refresh_token : "리프레시 토큰"
-    member ||--o{ exam_session : "접수/응시"
+    member ||--o{ exam_session : "시험/모의고사 응시"
 
-    exam_level ||--o{ exam : "레벨별 시험"
     exam_level ||--o{ question_info : "레벨별 문항 정보"
+    exam_level ||--o{ question_set : "레벨별 문항 세트"
     exam_level ||--o{ rating_tier : "등급 기준"
 
-    exam ||--o{ exam_session : "응시 세션"
-    exam ||--o{ question : "시험 문항"
+    exam |o--o{ exam_session : "정식 시험 응시"
+    question_set ||--o{ exam : "시험 출제 세트"
+    question_set ||--o{ question : "세트 문항"
+    question_set |o--o{ exam_session : "직접 응시 모의고사"
 
     exam_session ||--o| aes_task : "채점 작업"
-    exam_session ||--o| payment : "결제"
     exam_session ||--o{ submitted_answer : "제출 답안"
+    exam_session ||--o| payment : "결제"
+    rating_tier |o--o{ exam_session : "산출 등급 기준"
 
     question_info ||--o{ question : "문항 생성 정보"
-    question_info ||--o{ rubric : "문항별 세부 기준"
+    question_info ||--o{ criterion : "문항별 채점 기준"
+
+    submitted_answer ||--o{ score : "채점 결과"
 
     question ||--o{ submitted_answer : "제출 답안"
     question ||--o| question_image : "문항 이미지"
 
-    submitted_answer ||--o{ score : "채점 결과"
-
+    rubric ||--o{ criterion : "세부 채점 기준"
     rubric ||--o{ score : "루브릭별 점수"
-    rubric ||--o{ criterion : "공통 루브릭 기준"
 
 %% -- 회원 로그인 ID 중복 방지
 %% UNIQUE (username);
@@ -277,17 +293,17 @@ erDiagram
 %% -- 리프레시 토큰 JTI 중복 방지
 %% UNIQUE (jti);
 
-%% -- 시험 코드 중복 방지
-%% UNIQUE (code);
+%% -- 시험 공개 UUID 중복 방지
+%% UNIQUE (public_id);                         -- exam
 
-%% -- 시험 내 문항 번호 중복 방지
-%% UNIQUE (exam_id, number);
+%% -- 문항 세트 내 문항 슬롯 중복 방지
+%% UNIQUE (question_set_id, question_info_id); -- question
 
-%% -- 시험 내 문항 정렬 순서 중복 방지
-%% UNIQUE (exam_id, order_index);
+%% -- 레벨별 문항 규격 번호 중복 방지
+%% UNIQUE (exam_level_id, number);             -- question_info
 
 %% -- 문항 정보 기준 세부 기준 중복 방지
-%% UNIQUE (question_info_id, rubric_id, score_value);
+%% UNIQUE (question_info_id, rubric_id, score_value); -- criterion
 
 %% -- 한 응시 세션에서 같은 문항 답안 중복 방지
 %% UNIQUE (exam_session_id, question_id);
@@ -295,14 +311,30 @@ erDiagram
 %% -- 한 답안에서 같은 루브릭 점수 중복 방지
 %% UNIQUE (submitted_answer_id, rubric_id);
 
-%% -- 중복 접수 방지
-%% UNIQUE (exam_id, member_id);
+%% -- 시험/모의고사 세션 소스 제약
+%% CHECK ((exam_id IS NOT NULL) <> (question_set_id IS NOT NULL)); -- exam_session
+%% exam_id가 있으면 정식 시험 응시, question_set_id가 있으면 직접 응시 모의고사다.
+%% UNIQUE (exam_id, member_id) WHERE exam_id IS NOT NULL; -- 정식 시험 중복 접수 방지
+%% 모의고사는 동일 회원이 같은 문항 세트에 반복 응시할 수 있다.
+
+%% -- 문항 세트 정책
+%% PUBLIC_EXAM, INSTITUTION_EXAM 세트는 exam.question_set_id로 사용한다.
+%% MOCK_EXAM 세트는 exam 없이 exam_session.question_set_id로 바로 응시한다.
+%% question_set 생성 시 해당 exam_level의 모든 question_info에 대응하는 빈 question을 함께 생성한다.
+%% 문항 번호, 순서, 기본 배점은 question_info에서 가져온다.
+%% question.question_info의 exam_level_id는 소속 question_set.exam_level_id와 일치해야 한다.
+%% 시험 또는 모의고사에 사용하기 전 필수 문항 슬롯과 instruction, prompt가 모두 채워졌는지 검증한다.
+%% 이미 시험 또는 모의고사 세션에서 사용한 세트는 수정하지 않고, 새 구성이 필요하면 세트와 문항을 복제한다.
+%% submitted_answer.question_id는 해당 세션의 시험 또는 모의고사 문항 세트에 속해야 한다.
 
 %% -- 세션 공개 UUID 중복 방지
 %% UNIQUE (public_id);
 
 %% -- 결제와 응시 세션 1:1 보장
-%% UNIQUE (exam_session_id);
+%% UNIQUE (exam_session_id);                   -- payment
+
+%% -- 채점 작업과 응시 세션 1:1 보장
+%% UNIQUE (exam_session_id);                   -- aes_task
 
 %% -- 이미지 중복 방지
 %% UNIQUE (question_id);    -- question_image
