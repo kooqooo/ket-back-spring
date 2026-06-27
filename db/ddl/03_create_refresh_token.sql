@@ -4,16 +4,12 @@ CREATE TABLE IF NOT EXISTS refresh_token
     member_id            BIGINT                                  NOT NULL,
     replaced_by_token_id BIGINT,
     jti                  UUID                                    NOT NULL,
-    token_hash           VARCHAR(64)                             NOT NULL,
     issued_at            TIMESTAMP WITH TIME ZONE                NOT NULL,
     expires_at           TIMESTAMP WITH TIME ZONE                NOT NULL,
     revoked_at           TIMESTAMP WITH TIME ZONE,
-    revoked_reason       VARCHAR(20),
-    user_agent           TEXT,
-    ip_address           VARCHAR(45),
+    revocation_reason    VARCHAR(20),
     CONSTRAINT pk_refresh_token PRIMARY KEY (id),
     CONSTRAINT uk_refresh_token_jti UNIQUE (jti),
-    CONSTRAINT uk_refresh_token_hash UNIQUE (token_hash),
     CONSTRAINT fk_refresh_token_member FOREIGN KEY (member_id) REFERENCES member (id),
     CONSTRAINT fk_refresh_token_replaced_by_token FOREIGN KEY (replaced_by_token_id) REFERENCES refresh_token (id)
 );
