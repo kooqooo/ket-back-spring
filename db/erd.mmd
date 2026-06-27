@@ -30,6 +30,7 @@ erDiagram
 
     member {
         long id PK "회원 PK"
+        uuid public_id "회원 UUID"
         long country_id FK "국적 FK, nullable"
         long institution_id FK "기관 FK, nullable"
 
@@ -77,10 +78,22 @@ erDiagram
         int min_score "최소 점수"
     }
 
+    exam_group {
+        long id PK "시험 그룹 PK"
+        uuid public_id "시험 그룹 공개 UUID"
+        long institution_id FK "소속 기관 FK, nullable"
+
+        string name "시험 그룹명"
+        int iteration_number "공개 시험 회차"
+
+        timestamptz created_at "생성 시각"
+        timestamptz updated_at "수정 시각"
+    }
+
     exam {
         long id PK "시험 PK"
         uuid public_id "시험 공개 UUID"
-        long institution_id FK "소속 기관 FK, nullable"
+        long exam_group_id FK "시험 그룹 FK"
         long question_set_id FK "출제 문항 세트 FK"
 
         string name "시험명"
@@ -254,7 +267,7 @@ erDiagram
     country ||--o{ member : "국적"
 
     institution |o--o{ member : "소속 기관"
-    institution |o--o{ exam : "소속 기관"
+    institution |o--o{ exam_group : "소속 기관"
 
     member ||--o{ refresh_token : "리프레시 토큰"
     member ||--o{ exam_session : "시험/모의고사 응시"
@@ -263,6 +276,7 @@ erDiagram
     exam_level ||--o{ question_set : "레벨별 문항 세트"
     exam_level ||--o{ rating_tier : "등급 기준"
 
+    exam_group ||--o{ exam : "시험 묶음"
     exam |o--o{ exam_session : "정식 시험 응시"
     question_set ||--o{ exam : "시험 출제 세트"
     question_set ||--o{ question : "세트 문항"
@@ -285,6 +299,7 @@ erDiagram
     rubric ||--o{ score : "루브릭별 점수"
 
 %% -- 회원 로그인 ID 중복 방지
+%% UNIQUE (public_id);                          -- member
 %% UNIQUE (username);
 
 %% -- 이메일을 로그인/연락에 사용한다면
@@ -295,6 +310,7 @@ erDiagram
 
 %% -- 시험 공개 UUID 중복 방지
 %% UNIQUE (public_id);                         -- exam
+%% UNIQUE (public_id);                         -- exam_group
 
 %% -- 문항 세트 내 문항 슬롯 중복 방지
 %% UNIQUE (question_set_id, question_info_id); -- question
@@ -314,8 +330,8 @@ erDiagram
 %% -- 시험/모의고사 세션 소스 제약
 %% CHECK ((exam_id IS NOT NULL) <> (question_set_id IS NOT NULL)); -- exam_session
 %% exam_id가 있으면 정식 시험 응시, question_set_id가 있으면 직접 응시 모의고사다.
-%% UNIQUE (exam_id, member_id) WHERE exam_id IS NOT NULL; -- 정식 시험 중복 접수 방지
-%% 모의고사는 동일 회원이 같은 문항 세트에 반복 응시할 수 있다.
+%% UNIQUE (exam_id, member_id); -- 정식 시험 중복 접수 방지
+%% exam_id가 NULL인 모의고사는 PostgreSQL의 기본 NULL distinct 동작으로 반복 응시할 수 있다.
 
 %% -- 문항 세트 정책
 %% PUBLIC_EXAM, INSTITUTION_EXAM 세트는 exam.question_set_id로 사용한다.
