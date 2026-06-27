@@ -20,4 +20,7 @@ public class ExamLevel {
     @Column(nullable = false)
     private int level;
 
+    @Column(nullable = false)
+    private int price;
+
 }

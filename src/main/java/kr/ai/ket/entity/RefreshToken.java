@@ -19,8 +19,7 @@ import java.util.UUID;
                 @Index(name = "ix_refresh_token_member_active", columnList = "member_id, revoked_at, expires_at")
         },
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_refresh_token_jti", columnNames = "jti"),
-                @UniqueConstraint(name = "uk_refresh_token_hash", columnNames = "token_hash")
+                @UniqueConstraint(name = "uk_refresh_token_jti", columnNames = "jti")
         }
 )
 public class RefreshToken {
@@ -41,27 +40,18 @@ public class RefreshToken {
     @Column(nullable = false)
     private UUID jti;
 
-    @Column(nullable = false, length = 64)
-    private String tokenHash;
-
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant issuedAt;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant expiresAt;
 
-    @Column
+    @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private Instant revokedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column
-    private RefreshTokenRevokedReason revokedReason;
-
-    @Column(columnDefinition = "TEXT")
-    private String userAgent;
-
-    @Column(length = 45)
-    private String ipAddress;
+    @Column(name = "revocation_reason", length = 20)
+    private RefreshTokenRevokedReason revocationReason;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
@@ -84,12 +74,12 @@ public class RefreshToken {
 
     public void revokeByLogout(Instant now) {
         this.revokedAt = now;
-        this.revokedReason = RefreshTokenRevokedReason.LOGOUT;
+        this.revocationReason = RefreshTokenRevokedReason.LOGOUT;
     }
 
     public void rotate(Instant now, RefreshToken newRefreshToken) {
         this.revokedAt = now;
-        this.revokedReason = RefreshTokenRevokedReason.ROTATED;
+        this.revocationReason = RefreshTokenRevokedReason.ROTATED;
         this.replacedByToken = newRefreshToken;
     }
 

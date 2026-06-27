@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,11 +14,15 @@ import java.time.LocalDate;
 @Table(
         name = "member",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_username", columnNames = "username"),
-                @UniqueConstraint(name = "uk_email", columnNames = "email"),
+                @UniqueConstraint(name = "uk_member_public_id", columnNames = "public_id"),
+                @UniqueConstraint(name = "uk_member_username", columnNames = "username"),
+                @UniqueConstraint(name = "uk_member_email", columnNames = "email"),
         }
 )
 public class Member extends BaseEntity {
+
+    @Column(name = "public_id", nullable = false, updatable = false)
+    private UUID publicId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", foreignKey = @ForeignKey(name = "fk_member_institution"))
@@ -53,12 +58,19 @@ public class Member extends BaseEntity {
     private String email;
 
     @Column
-    private LocalDate birthDate;
+    private LocalDate birthdate;
 
     @Column
     private String phoneNumber;
 
     @Column(name = "is_email_verified", nullable = false)
     private boolean emailVerified = false;
+
+    @Override
+    protected void onPrePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
+    }
 
 }

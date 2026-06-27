@@ -4,52 +4,64 @@ import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Entity
 @Table(
         name = "exam",
         indexes = {
-                @Index(name = "ix_exam_institution_id", columnList = "institution_id"),
+                @Index(name = "ix_exam_exam_group_id", columnList = "exam_group_id"),
+                @Index(name = "ix_exam_question_set_id", columnList = "question_set_id"),
+        },
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_exam_public_id", columnNames = "public_id")
         }
-        // (level, inst, iter) 조합의 unique constraint는 DDL에 정의
 )
 public class Exam extends BaseEntity {
 
+    @Column(name = "public_id", nullable = false, updatable = false)
+    private UUID publicId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "level_id",
+            name = "exam_group_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_exam_exam_level")
+            foreignKey = @ForeignKey(name = "fk_exam_exam_group")
     )
-    private ExamLevel level;
+    private ExamGroup examGroup;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "institution_id",
-            foreignKey = @ForeignKey(name = "fk_exam_institution")
+            name = "question_set_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_exam_question_set")
     )
-    private Institution institution;
-
-    @Column(nullable = false)
-    private int iterationNumber;
+    private QuestionSet questionSet;
 
     @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    Instant registrationStartsAt;
+    private Instant registrationStartsAt;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    Instant registrationEndsAt;
+    private Instant registrationEndsAt;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    Instant startsAt;
+    private Instant startsAt;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    Instant endsAt;
+    private Instant endsAt;
 
     @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    Instant resultAvailableAt;
+    private Instant resultsAvailableAt;
+
+    @Override
+    protected void onPrePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
+    }
 
 }

@@ -9,7 +9,7 @@ public abstract class BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column
     private Long id;
 
     @Column(nullable = false, updatable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
@@ -21,6 +21,10 @@ public abstract class BaseEntity {
     @PrePersist
     void onCreate() {
         this.createdAt = Instant.now();
+        onPrePersist();
+    }
+
+    protected void onPrePersist() {
     }
 
     @PreUpdate
